@@ -15,20 +15,18 @@ os.makedirs(FRAME_DIR, exist_ok=True)
 producer_conf = {"bootstrap.servers": KAFKA_BROKER}
 producer = Producer(producer_conf)
 
+
 def delivery_report(err, msg):
     if err is not None:
         print(f"Delivery failed: {err}")
     else:
         print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
 
+
 def send_with_retry(message, retries=5, delay=2):
     for attempt in range(1, retries + 1):
         try:
-            producer.produce(
-                TOPIC,
-                value=json.dumps(message),
-                callback=delivery_report
-            )
+            producer.produce(TOPIC, value=json.dumps(message), callback=delivery_report)
             producer.poll(0)
             return True
         except BufferError as e:
@@ -38,6 +36,7 @@ def send_with_retry(message, retries=5, delay=2):
             print(f"Attempt {attempt}/{retries} failed: {e}")
             time.sleep(delay)
     return False
+
 
 def main():
     cap = cv2.VideoCapture(0 if VIDEO_PATH == "0" else VIDEO_PATH)
@@ -56,7 +55,7 @@ def main():
         message = {
             "frame_id": frame_id,
             "frame_path": frame_path,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
         success = send_with_retry(message)
         if not success:
@@ -67,6 +66,7 @@ def main():
 
     producer.flush()
     cap.release()
+
 
 if __name__ == "__main__":
     print("start")

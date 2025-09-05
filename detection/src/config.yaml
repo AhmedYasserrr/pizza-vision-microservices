@@ -1,0 +1,26 @@
+model:
+  path: "model.pt"
+video:
+  source: "Sah b3dha ghalt.mp4"
+  window_size: [1200, 800]
+
+classes:
+  HAND: 0
+  PERSON: 1
+  PIZZA: 2
+  SCOOPER: 3
+
+thresholds:
+  conf: 0.4
+  scooper_grace: 25
+  move_grace: 20
+  toppings_grace: 12
+  transition_grace: 5
+
+palette:
+  - [255, 0, 0]     # Blue
+  - [0, 255, 0]     # Green
+  - [0, 0, 255]     # Red
+  - [255, 255, 0]   # Cyan
+  - [255, 0, 255]   # Magenta
+  - [0, 255, 255]   # Yellow

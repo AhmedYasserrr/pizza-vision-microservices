@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+From ultralytics/ultralytics:8.3.191-cpu
 
 WORKDIR /app
 
@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ .
 
-CMD ["python", "frame_reader.py"]
+CMD ["python", "main.py"]

@@ -37,6 +37,21 @@ services:
     depends_on:
       - broker
 
+  detection:
+    build: ./detection
+    container_name: detection
+    volumes:
+      - ./data/frames:/mnt/frames
+    environment:
+      CONSUMER_TOPIC: "frames"
+      PRODUCER_TOPIC: "detections"
+      KAFKA_BROKER: "broker:29092"
+      FRAME_DIR: /mnt/frames
+      MONGO_USER: ${MONGO_USER} 
+      MONGO_PASS: ${MONGO_PASS}
+    depends_on:
+      - broker
+
   tester:
     image: apache/kafka:latest
     container_name: tester
