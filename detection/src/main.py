@@ -11,6 +11,7 @@ if __name__ == "__main__":
     cfg["CONSUMER_TOPIC"] = os.getenv("CONSUMER_TOPIC", "frames")
     cfg["PRODUCER_TOPIC"] = os.getenv("PRODUCER_TOPIC", "detections")
     cfg["FRAME_DIR"] = os.getenv("FRAME_DIR", "/mnt/frames")
+    cfg["SERVER_DIR"] = os.getenv("SERVER_DIR", "/mnt/server")
     cfg["MONGO_USER"] = os.getenv("MONGO_USER")
     cfg["MONGO_PASS"] = os.getenv("MONGO_PASS")
 

@@ -62,7 +62,7 @@ def main():
             print(f"Dropped frame {frame_id} after retries")
 
         frame_id += 1
-        time.sleep(1)
+        # time.sleep(1)
 
     producer.flush()
     cap.release()

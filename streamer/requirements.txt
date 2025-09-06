@@ -1,0 +1,7 @@
+opencv-python-headless
+aiokafka
+numpy
+fastapi
+uvicorn[standard]
+aiofiles
+pymongo[srv]

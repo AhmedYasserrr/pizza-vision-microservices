@@ -1,5 +1,6 @@
 import cv2
 import json
+import os
 import numpy as np
 from pymongo import MongoClient
 from ultralytics import YOLO
@@ -185,13 +186,14 @@ class VideoDetector:
                             }
                         )
 
-                violation_frame_path = frame_path[:-4] + "_violation.jpg"
+                frame_name = f"frame_{frame_msg['frame_id']:05d}.jpg"
+                violation_frame_path = os.path.join(self.cfg["SERVER_DIR"], frame_name)
                 cv2.imwrite(violation_frame_path, frame)
 
                 # Create violation document
                 violation_doc = {
                     "frame_id": frame_msg["frame_id"],
-                    "frame_path": violation_frame_path,
+                    "frame_name": frame_name,
                     "timestamp": frame_msg["timestamp"],
                     "bounding_boxes": bbox_docs,
                     "violation_count": self.violation_count,

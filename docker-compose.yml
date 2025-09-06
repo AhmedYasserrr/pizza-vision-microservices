@@ -42,11 +42,33 @@ services:
     container_name: detection
     volumes:
       - ./data/frames:/mnt/frames
+      - ./data/server:/mnt/server
     environment:
       CONSUMER_TOPIC: "frames"
       PRODUCER_TOPIC: "detections"
       KAFKA_BROKER: "broker:29092"
       FRAME_DIR: /mnt/frames
+      SERVER_DIR: /mnt/server
+      MONGO_USER: ${MONGO_USER} 
+      MONGO_PASS: ${MONGO_PASS}
+    depends_on:
+      - broker
+
+  streamer:
+    build: ./streamer
+    container_name: streamer
+    volumes:
+      - ./data/frames:/mnt/frames
+      - ./data/server:/mnt/server
+    ports:
+      - "8765:8765"
+    environment:
+      CONSUMER_TOPIC: "detections"
+      KAFKA_BROKER: "broker:29092"
+      FRAME_DIR: /mnt/frames
+      SERVER_DIR: /mnt/server
+      WEBSOCKET_HOST: "0.0.0.0"
+      WEBSOCKET_PORT: "8765"
       MONGO_USER: ${MONGO_USER} 
       MONGO_PASS: ${MONGO_PASS}
     depends_on:
