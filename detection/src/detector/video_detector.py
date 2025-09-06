@@ -14,13 +14,13 @@ from .utils import (
     get_polygon,
     to_builtin,
 )
-from .hand_fsm import GlobalFSM, Place
+from .hand_fsm import GlobalFSM, Place, State
 
 
 class VideoDetector:
     def __init__(self, cfg):
         self.cfg = cfg
-        self.model = YOLO(cfg["model"]["path"])
+        self.model = YOLO(cfg["MODEL_PATH"])
 
         # Mongodb config
         uri = f"mongodb+srv://{cfg['MONGO_USER']}:{cfg['MONGO_PASS']}@cluster0.ifbypwd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
@@ -55,11 +55,13 @@ class VideoDetector:
         # ROIs and FSM
         self.rois = [
             [(519, 276), (649, 285), (613, 722), (441, 705)],
-            [(478, 260), (522, 269), (439, 692), (367, 694)],
+            [(476, 265), (530, 271), (486, 438), (435, 431)],
         ]  # [table, toppings]
 
         self.fsm = GlobalFSM(cfg)
         self.violation_count = 0
+        self.violation_frames = 0
+        self.read_before = False
 
     def get_rois(self, n=2):
         ret, frame = self.cap.read()
@@ -127,6 +129,11 @@ class VideoDetector:
             frame_msg = json.loads(msg.value())
             frame_path = frame_msg["frame_path"]
 
+            if frame_msg["frame_id"] == 1:
+                if self.read_before:
+                    break
+                self.read_before = True
+
             # Read the frame
             frame = cv2.imread(frame_path)
             if frame is None:
@@ -172,6 +179,7 @@ class VideoDetector:
             )
             if violation_seen:
                 self.violation_count += 1
+                self.violation_frames = 15
 
                 # Collect bounding boxes + labels
                 bbox_docs = []
@@ -203,28 +211,61 @@ class VideoDetector:
                 # Insert into MongoDB
                 violation_doc = to_builtin(violation_doc)
                 self.violations.insert_one(violation_doc)
-                print(f"[DB] Violation saved for {frame_path}")
+                print(f"[DB] Violation saved for {violation_frame_path}")
 
-            # draw state on frame
-            text = f"State: {state.name}, Place: {place.name}, Violations: {self.violation_count}"
+            # First line: state, place, violation count
+            color = (0, 255, 0)  # green by default
+            if state == State.IN_TOPPINGS:
+                color = (0, 255, 0)  # green
+            elif state == State.MOVING_TO_TABLE:
+                color = (0, 255, 255)  # yellow
+            elif state == State.TOUCHING_PIZZA:
+                color = (0, 0, 255)  # red
+
+            text1 = f"State: {state.value}, Place: {place.value}, Violation count: {self.violation_count}"
             write_on_image(
                 frame,
-                text,
+                text1,
                 org=(50, 50),
                 font=cv2.FONT_HERSHEY_SIMPLEX,
                 scale=1,
                 thickness=2,
+                color=color,
             )
 
-            text = f"Toppings timer: {toppings_timer}, Moving timer: {move_timer}, Scooper timer: {scooper_timer}"
+            # Second line: timer/explanation
+            if state == State.IDLE:
+                text2 = ""
+            elif state == State.IN_TOPPINGS:
+                text2 = f"[{state.value}] Time in Toppings: {toppings_timer}"
+            elif state == State.MOVING_TO_TABLE:
+                text2 = f"[{state.value}] Checking touching pizza: {move_timer}"
+            elif state == State.TOUCHING_PIZZA:
+                text2 = f"[{state.value}] Checking using scooper: {scooper_timer}"
+
             write_on_image(
                 frame,
-                text,
+                text2,
                 org=(50, 100),
                 font=cv2.FONT_HERSHEY_SIMPLEX,
                 scale=1,
                 thickness=2,
+                color=color,
             )
+
+            # Show VIOLATION for a few frames
+            if self.violation_frames > 0:
+                violation_text = "VIOLATION!"
+                write_on_image(
+                    frame,
+                    violation_text,
+                    org=(frame.shape[1] // 2 + 20, 50),
+                    font=cv2.FONT_HERSHEY_SIMPLEX,
+                    scale=1,
+                    thickness=2,
+                    color=(0, 0, 255),
+                )
+                self.violation_frames -= 1
 
             self._draw_detections(frame, results)
             self._draw_rois(frame)
@@ -245,6 +286,3 @@ class VideoDetector:
                 self.cfg["PRODUCER_TOPIC"], value=json.dumps(annotated_msg)
             )
             self.producer.poll(0)
-
-        self.cap.release()
-        cv2.destroyAllWindows()

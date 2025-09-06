@@ -1,8 +1,8 @@
-model:
-  path: "model.pt"
-video:
-  source: "Sah b3dha ghalt.mp4"
-  window_size: [1200, 800]
+# model:
+#   path: "model.pt"
+# video:
+#   source: "Sah b3dha ghalt.mp4"
+#   window_size: [1200, 800]
 
 classes:
   HAND: 0

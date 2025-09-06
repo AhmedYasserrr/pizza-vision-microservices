@@ -47,6 +47,7 @@ services:
       CONSUMER_TOPIC: "frames"
       PRODUCER_TOPIC: "detections"
       KAFKA_BROKER: "broker:29092"
+      MODEL_PATH: /mnt/frames/model.pt
       FRAME_DIR: /mnt/frames
       SERVER_DIR: /mnt/server
       MONGO_USER: ${MONGO_USER} 
@@ -73,7 +74,3 @@ services:
       MONGO_PASS: ${MONGO_PASS}
     depends_on:
       - broker
-
-  tester:
-    image: apache/kafka:latest
-    container_name: tester

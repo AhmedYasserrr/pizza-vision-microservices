@@ -72,9 +72,9 @@ def get_polygon(frame):
     return polygon_points
 
 
-def write_on_image(frame, text, org, font, scale, thickness):
+def write_on_image(frame, text, org, font, scale, thickness, color):
     cv2.putText(frame, text, org, font, scale, (0, 0, 0), thickness + 4, cv2.LINE_AA)
-    cv2.putText(frame, text, org, font, scale, (0, 255, 0), thickness, cv2.LINE_AA)
+    cv2.putText(frame, text, org, font, scale, color, thickness, cv2.LINE_AA)
 
 
 def to_builtin(obj):

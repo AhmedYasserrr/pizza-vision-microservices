@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class Place(Enum):
-    IDLE = "Idle"
+    IDLE = "Not Seen"
     IN_TABLE = "In Table"
     IN_TOPPINGS = "In Toppings"
 
 
 class State(Enum):
-    IDLE = "Idle"
+    IDLE = "Normal"
     IN_TOPPINGS = "In Toppings"
     MOVING_TO_TABLE = "Moving to Table"
     TOUCHING_PIZZA = "Touching Pizza"
